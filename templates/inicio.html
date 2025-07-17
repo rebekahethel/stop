@@ -4,7 +4,44 @@
 
 <h1>Bem-vindo ao STOP!</h1>
 
-<button class="btn btn-primary" >
-    Iniciar Jogo  
+<button class="btn btn-primary">
+    Iniciar Jogo
 </button>
+
+
+
+<div class="row">
+    <div class="col-md-2 col-lg-2">
+
+        <img src="/static/avatar.jpg" alt="Avatar" class="img-fluid rounded-circle"
+            style="width: 120px; height: 120px;">
+
+    </div>
+    <div class="col-md-3 col-lg-3">
+        <form action="/jogar">
+            <input type="text" class="form-control" placeholder="Digite seu nome" name="username" required>
+
+        </form>
+
+
+    </div>
+    <div class="col-md-7 col-lg-7">
+        <h2>Regras</h2>
+        <ul>
+            <div class="row justify-content-center">
+                <button>Jogar</button>
+            </div>
+            <div class="row justify-content-center">
+                <button>Criar Salas</button>
+            </div>
+            <div class="row justify-content-center">
+                <button>Salas Criadas</button>
+            </div>
+
+
+        </ul>
+    </div>
+
+</div>
+
 {% endblock %}

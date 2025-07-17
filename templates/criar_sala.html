@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Criar Sala</h1>
+
+<div class="container">
+    <form method="POST" action="/criar_sala">
+        <div class="mb-3">
+            <label for="numero_rodadas" class="form-label">Número de Rodadas</label>
+            <input type="number" class="form-control" id="numero_rodadas" name="numero_rodadas" required>
+        </div>
+        <div class="mb-3">
+            <label for="numero_jogadores" class="form-label">Número de Jogadores</label>
+            <input type="number" class="form-control" id="numero_jogadores" name="numero_jogadores" required>
+        </div>
+        <div class="mb-3">
+            <label for="senha" class="form-label">Senha (opcional)</label>
+            <input type="password" class="form-control" id="senha" name="senha">
+        </div>
+        <div class="mb-3">
+            <label for="tempo" class="form-label">Tempo (em segundos)</label>
+            <input type="number" class="form-control" id="tempo" name="tempo" required>
+        </div>
+        <div class="mb-3">
+            <label for="letras" class="form-label">Letras</label>
+            <select multiple class="form-control" id="letras" name="letras">
+                {% for letra in letras %}
+                    <option value="{{ letra.id }}">{{ letra.letra }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="temas" class="form-label">Temas</label>
+            <select multiple class="form-control" id="temas" name="temas">
+                {% for tema in temas %}
+                    <option value="{{ tema.id }}">{{ tema.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Criar Sala</button>
+    </form>
+
+</div>
+
+
+{% endblock %}
