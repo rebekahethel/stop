@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div class="container mt-5">
+    <h1>Gerenciar Letras</h1>
+    <form method="POST" action="/admin/letra">
+        <div class="mb-3">
+            <label for="letra" class="form-label">Letras</label>
+            <input type="text" class="form-control" id="letra" name="letra" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Adicionar Letras</button>
+    </form>
+
+    <h2 class="mt-4">Lista de Letras</h2>
+    <ul class="list-group">
+
+
+        {% for letra in letras %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ letra.letra }}
+                <form method="POST" action="/admin/letra/{{ letra.id }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                </form>
+            </li>
+        {% endfor %} 
+    </ul>
+</div>
+{% endblock %}

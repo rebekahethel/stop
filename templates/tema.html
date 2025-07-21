@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div class="container mt-5">
+    <h1>Gerenciar Temas</h1>
+    <form method="POST" action="/admin/tema">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Tema</label>
+            <input type="text" class="form-control" id="nome" name="nome" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Adicionar Tema</button>
+    </form>
+
+    <h2 class="mt-4">Lista de Temas</h2>
+    <ul class="list-group">
+
+
+        {% for tema in temas %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ tema.nome }}
+                <form method="POST" action="/admin/tema/{{ tema.id }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                </form>
+            </li>
+        {% endfor %} 
+    </ul>
+</div>
+{% endblock %}

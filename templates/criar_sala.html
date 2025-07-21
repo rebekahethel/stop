@@ -8,11 +8,19 @@
     <form method="POST" action="/criar_sala">
         <div class="mb-3">
             <label for="numero_rodadas" class="form-label">Número de Rodadas</label>
-            <input type="number" class="form-control" id="numero_rodadas" name="numero_rodadas" required>
+            <select class="form-control" id="numero_rodadas" name="numero_rodadas">
+                {% for rodada in numero_rodadas %}
+                    <option value="{{ rodada }}">{{ rodada }}</option>
+                {% endfor %}
+            </select>
         </div>
         <div class="mb-3">
             <label for="numero_jogadores" class="form-label">Número de Jogadores</label>
-            <input type="number" class="form-control" id="numero_jogadores" name="numero_jogadores" required>
+            <select class="form-control" id="numero_jogadores" name="numero_jogadores">
+                {% for jogador in numero_jogadores %}
+                    <option value="{{ jogador }}">{{ jogador }}</option>
+                {% endfor %}
+            </select>
         </div>
         <div class="mb-3">
             <label for="senha" class="form-label">Senha (opcional)</label>
@@ -20,7 +28,12 @@
         </div>
         <div class="mb-3">
             <label for="tempo" class="form-label">Tempo (em segundos)</label>
-            <input type="number" class="form-control" id="tempo" name="tempo" required>
+            <select class="form-control" id="tempo" name="tempo">
+                {% for t in tempo %}
+                    <option value="{{ t }}">{{ t }}</option>
+                {% endfor %}
+
+            </select>
         </div>
         <div class="mb-3">
             <label for="letras" class="form-label">Letras</label>
