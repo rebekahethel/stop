@@ -105,13 +105,17 @@ def criar_sala():
         #pdb.set_trace()
         senha = request.form.get('senha')
         tempo = request.form.get('tempo')
-        letras = request.form.get('letras')
-        temas = request.form.get('temas')
+        letras_ids = request.form.getlist('letras')
+        temas_ids = request.form.getlist('temas')
 
-        sala = Sala(numero_rodadas=numero_rodadas, tempo=60, numero_jogadores=numero_jogadores, senha=senha)
+        letras = Letras.query.filter(Letras.id.in_(letras_ids)).all()
+        temas = Tema.query.filter(Tema.id.in_(temas_ids)).all()
+
+        sala = Sala(numero_rodadas=numero_rodadas, tempo=60, numero_jogadores=numero_jogadores, senha=senha, temas=temas, letras=letras)
         
         db.session.add(sala)
         db.session.commit()
+
         return redirect(url_for('inicio'))
     
     letras = Letras.query.all()
@@ -121,6 +125,12 @@ def criar_sala():
     tempo = [60, 120, 180]
 
     return render_template('criar_sala.html', letras=letras, temas=temas , numero_jogadores=numero_jogadores, numero_rodadas=numero_rodadas, tempo=tempo) 
+
+@app.route('/sala/<int:sala_id>')
+def sala(sala_id):
+    sala = Sala.query.get_or_404(sala_id)
+    
+    return render_template('sala.html', sala=sala, rodadas=sala.rodadas, letras=sala.letras, temas=sala.temas, jogadores=sala.jogadores)
 
 
 
@@ -135,7 +145,17 @@ def admin_tema():
     temas = Tema.query.all()
     return render_template('tema.html', temas=temas)
 
-
+@app.route('/sala/iniciar', methods=['GET', 'POST'])
+def iniciar_sala():
+    if request.method == 'POST':
+        sala_id = request.form.get('sala_id')
+        sala = Sala.query.get_or_404(sala_id)
+        sala.data_inicio = db.func.current_timestamp()
+        db.session.add(sala)
+        db.session.commit()
+           
+        return redirect(url_for('sala', sala_id=sala.id))
+    
 
 @app.route('/admin/letra', methods=['GET', 'POST'])
 def admin_letras():

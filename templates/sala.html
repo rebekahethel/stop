@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if sala.data_inicio %}
+<div class="container mt-5">
+    <h1>Sala: {{ sala.id }}</h1>
+    <p>Data de Início: {{ sala.data_inicio.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+    {% else %}
+    <div class="container mt-5">
+        <h1>Sala: {{ sala.id }}</h1>
+        <p>Aguardando início do jogo...</p>
+        {% endif %}
+
+
+
+
+        <div class="row">
+            <!-- Coluna de jogadores -->
+            <div class="col-md-2 col-lg-2" style="background-color: aqua;">
+                <h5>Jogadores</h5>
+                <ul class="list-unstyled">
+                    {% for jogador in ["rebekah","danilo"] %}
+                    <li class="d-flex align-items-center mb-2">
+                        <!-- Avatar redondo (pode substituir por URL do jogador depois) -->
+                        <img src="{{ url_for('static', filename='avatar.jpg') }}" alt="avatar" width="40" height="40"
+                            class="rounded-circle me-2">
+                        <span>{{ jogador }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+          
+            <div class="col-md-7 col-lg-7" style="background-color:black">
+                {% if sala.data_inicio %}
+
+                <div>
+                    <form action="/sala/stop">
+                        <input type="hidden" name="sala_id" value="{{ sala.id }}">
+                        {% for tema in temas %} 
+                        <label for="tema_{{tema.id}}">{{tema.nome}}</label>
+                        <input type="text" class="form-control mb-2" id="{{tema.nome}}" name="tema_{{tema.id}}" placeholder="Digite a resposta para {{tema.nome}}" required>
+                        {% endfor %}
+                       
+                        {{sala.temas}}
+                        {{temas}}
+                       
+                        <button type="submit" class="btn btn-danger">Parar Jogo</button>
+                    </form>
+
+                </div>
+                <button class="btn btn-primary">
+                    STOP
+                </button>
+                {% else %}
+
+                <form action="/sala/iniciar" method="post">
+                    <input type="hidden" name="sala_id" value="{{ sala.id }}">
+                <button type="submit" class="btn btn-primary">
+                    Iniciar Jogo
+                </button>
+                </form>
+                
+                {% endif %}
+            </div>
+
+            <!-- Chat -->
+            <div class="col-md-3 col-lg-3" style="background-color: lightsalmon;">
+                <h2>Chat</h2>
+            </div>
+        </div>
+
+        {% endblock %}
