@@ -2,47 +2,57 @@
 
 {% block content %}
 
-<h1>Bem-vindo ao STOP!</h1>
-
-<button class="btn btn-primary">
-    Iniciar Jogo
-</button>
+<div class="container mt-5">
+    <div class="card-principal">
 
 
+        <h1>Bem-vindo ao STOP!</h1>
 
-<div class="row">
-    <div class="col-md-2 col-lg-2">
-
-        <img src="/static/avatar.jpg" alt="Avatar" class="img-fluid rounded-circle"
-            style="width: 120px; height: 120px;">
-
-    </div>
-    <div class="col-md-3 col-lg-3">
-        <form action="/jogar">
-            <input type="text" class="form-control" placeholder="Digite seu nome" name="username" required>
-
-        </form>
+        <br>
 
 
-    </div>
-    <div class="col-md-7 col-lg-7">
-        <h2>Regras</h2>
-        <ul>
-            <div class="row justify-content-center mt-2">
-                <a class= "btn btn-primary" href="/jogar" >Jogar</a>
-            </div>
-            <div class="row justify-content-center mt-2">
-                <a class="btn btn-primary" href="/criar_sala">Criar Sala</a>
-                
-            </div>
-            <div class="row justify-content-center mt-2">
-                <a class="btn btn-primary" href="/salas">Salas Criadas</a>
+
+
+        <div class="row">
+            <div class="col-md-5 col-lg-5 d-flex justify-content-center">
+
+                <div class="row align-items-center">
+                    <div class="col-md-5 col-lg-5 d-flex justify-content-center">
+                        <img src="/static/avatar.jpg" alt="Avatar" class="img-fluid rounded-circle"
+                            style="width: 120px; height: 120px;">
+                    </div>
+
+                    <div class="col-md-7 col-lg-7 d-flex flex-column justify-content-center">
+                        <form action="/jogar">
+                            
+                            <input type="text" class="form-control mb-3" placeholder="Digite seu nome" name="username"
+                                required>
+
+                        </form>
+                    </div>
+                </div>
             </div>
 
 
-        </ul>
-    </div>
 
+
+            <div class="col-md-7 col-lg-7 d-flex flex-column justify-content-center">
+                <div class="text-center mb-3">
+                    <a class="btn botao w-auto mx-auto" href="/jogar">Jogar</a>
+                </div>
+                <div class="text-center mb-3">
+                    <a class="btn botao w-auto mx-auto" href="/criar_sala">Criar Sala</a>
+                </div>
+                <div class="text-center mb-3">
+                    <a class="btn botao w-auto mx-auto" href="/salas">Salas Criadas</a>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
 </div>
 
 {% endblock %}

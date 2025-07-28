@@ -133,6 +133,10 @@ def sala(sala_id):
     return render_template('sala.html', sala=sala, rodadas=sala.rodadas, letras=sala.letras, temas=sala.temas, jogadores=sala.jogadores)
 
 
+@app.route('/salas', methods=['GET'])
+def salas():
+    salas = Sala.query.all()
+    return render_template('salas_criadas.html', salas=salas)
 
 @app.route('/admin/tema', methods=['GET', 'POST'])
 def admin_tema():

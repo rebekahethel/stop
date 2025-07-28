@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div class="container mt-5">
+    <h1>Salas Criadas</h1>
+    <ul class="list-group">
+        {% for sala in salas %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Sala ID: {{ sala.id }} - Data de Início: {{ sala.data_inicio.strftime('%Y-%m-%d %H:%M:%S') if sala.data_inicio else 'Aguardando início' }}
+                <a href="{{ url_for('sala', sala_id=sala.id) }}" class="btn btn-primary btn-sm">Entrar</a>
+            </li>
+        {% endfor %}
+    </ul>
+    {% if not salas %}
+        <p class="mt-3">Nenhuma sala criada ainda.</p>
+    {% endif %}
+
+
+</div>
+
+
+
+{% endblock %}
