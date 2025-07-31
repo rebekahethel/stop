@@ -4,53 +4,101 @@
 
 <h1>Criar Sala</h1>
 
-<div class="container">
+<div class="">
     <form method="POST" action="/criar_sala">
-        <div class="mb-3">
-            <label for="numero_rodadas" class="form-label">Número de Rodadas</label>
-            <select class="form-control" id="numero_rodadas" name="numero_rodadas">
-                {% for rodada in numero_rodadas %}
-                    <option value="{{ rodada }}">{{ rodada }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="numero_jogadores" class="form-label">Número de Jogadores</label>
-            <select class="form-control" id="numero_jogadores" name="numero_jogadores">
-                {% for jogador in numero_jogadores %}
-                    <option value="{{ jogador }}">{{ jogador }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="senha" class="form-label">Senha (opcional)</label>
-            <input type="password" class="form-control" id="senha" name="senha">
-        </div>
-        <div class="mb-3">
-            <label for="tempo" class="form-label">Tempo (em segundos)</label>
-            <select class="form-control" id="tempo" name="tempo">
-                {% for t in tempo %}
-                    <option value="{{ t }}">{{ t }}</option>
-                {% endfor %}
+        <div class="row">
+            <div class="col-md-3 col-lg-3">
+                <div class="row">
+                    <div class="col-md-6 col-lg-6">
+                        <div class="mb-3">
+                            <label for="numero_rodadas" class="form-label">Número de Rodadas</label>
+                            <select class="form-control" id="numero_rodadas" name="numero_rodadas">
+                                {% for rodada in numero_rodadas %}
+                                <option value="{{ rodada }}">{{ rodada }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-6">
+                        <div class="mb-3">
+                            <label for="numero_jogadores" class="form-label">Número de Jogadores</label>
+                            <select class="form-control" id="numero_jogadores" name="numero_jogadores">
+                                {% for jogador in numero_jogadores %}
+                                <option value="{{ jogador }}">{{ jogador }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
 
-            </select>
+                </div>
+
+                <div class="row">
+                    <div class="mb-3">
+                        <label for="tempo" class="form-label">Tempo (em segundos)</label>
+                        <select class="form-control" id="tempo" name="tempo">
+                            {% for t in tempo %}
+                            <option value="{{ t }}">{{ t }}</option>
+                            {% endfor %}
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="mb-3">
+                        <label for="senha" class="form-label">Senha (opcional)</label>
+                        <input type="password" class="form-control" id="senha" name="senha">
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="col-md-6 col-lg-6">
+                <div class="row">
+                    <label class="form-label d-block">Temas</label>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for tema in temas %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" checked="checked" type="checkbox" name="temas[]" id="tema_{{ tema.id }}"
+                                value="{{ tema.id }}">
+                            <label class="form-check-label" for="tema_{{ tema.id }}">
+                                {{ tema.nome }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+           
+                </div>
+                <div class="row">
+                    <input type="text" class="input-text mb-3" placeholder="Adicionar tema" name="nome_sala"
+                        required>
+                </div>
+
+              
+                    
+            </div>
+            <div class="col-md-3 col-lg-3">
+
+                              
+                    <label class="form-label d-block">Letras</label>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for letra in letras %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" checked="checked" type="checkbox" name="letras[]" id="letra_{{ letra.id }}"
+                                value="{{ letra.id }}">
+                            <label class="form-check-label" for="letra_{{ letra.id }}">
+                                {{ letra.letra }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+           
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="letras" class="form-label">Letras</label>
-            <select multiple class="form-control" id="letras" name="letras">
-                {% for letra in letras %}
-                    <option value="{{ letra.id }}">{{ letra.letra }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="temas" class="form-label">Temas</label>
-            <select multiple class="form-control" id="temas" name="temas">
-                {% for tema in temas %}
-                    <option value="{{ tema.id }}">{{ tema.nome }}</option>
-                {% endfor %}
-            </select>
-        </div>
+
+
+
+
         <button type="submit" class="btn btn-primary">Criar Sala</button>
     </form>
 

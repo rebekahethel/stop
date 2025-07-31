@@ -4,6 +4,7 @@
     background-color: #819cf8;
     border-radius: 10px;
     padding: 20px;
+    font-size: larger;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
 }
@@ -22,4 +23,27 @@
 .botao:hover {
     background-color: #0a1fbb;
     color: white;
+}
+
+
+.input-text {   
+    border: #819cf8;
+    background-color:#819cf8;
+    border-bottom: 2px solid #09138d;
+    padding: 10px 10px 10px 0px;
+    width: 100%;    
+    outline: none;  
+    box-shadow: none;    
+    background: none; 
+    }
+
+
+.input-text:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.input-text::placeholder {
+    color: #ffffff;
+    font-size:larger
 }
