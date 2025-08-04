@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+import random
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stop.db'
@@ -14,11 +15,12 @@ class Rodada(db.Model):
     numero = db.Column(db.Integer, nullable=False)
     sala_id = db.Column(db.Integer, db.ForeignKey('sala.id'), nullable=False)
     letra_id = db.Column(db.ForeignKey('letras.id'), nullable=False)
+    letra = db.relationship('Letras', backref='rodadas', lazy=True)
     data_inicio = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     data_fim = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
-        return f'<Rodada {self.numero} - Letra: {self.letra} - Palavra: {self.palavra} - Pontos: {self.pontos}>'
+        return f'<Rodada {self.numero}>'
     
 
 class Tema(db.Model):
@@ -85,7 +87,7 @@ class Letras(db.Model):
    
 
     def __repr__(self):
-        return f'<Tema {self.nome}>'
+        return f'<Tema {self.letra}>'
 
 
 with app.app_context():
@@ -102,21 +104,22 @@ def criar_sala():
         numero_rodadas = request.form.get('numero_rodadas')
         numero_jogadores = request.form.get('numero_jogadores')
         import pdb
-        #pdb.set_trace()
+       
+        
         senha = request.form.get('senha')
         tempo = request.form.get('tempo')
-        letras_ids = request.form.getlist('letras')
-        temas_ids = request.form.getlist('temas')
+        letras_ids = request.form.getlist('letras[]')
+        temas_ids = request.form.getlist('temas[]')
 
         letras = Letras.query.filter(Letras.id.in_(letras_ids)).all()
         temas = Tema.query.filter(Tema.id.in_(temas_ids)).all()
-
-        sala = Sala(numero_rodadas=numero_rodadas, tempo=60, numero_jogadores=numero_jogadores, senha=senha, temas=temas, letras=letras)
+        sala = Sala(numero_rodadas=numero_rodadas, tempo=tempo, numero_jogadores=numero_jogadores, senha=senha, temas=temas, letras=letras )
         
         db.session.add(sala)
         db.session.commit()
-
-        return redirect(url_for('inicio'))
+        import pdb
+        #pdb.set_trace()
+        return redirect(url_for('sala', sala_id=sala.id))
     
     letras = Letras.query.all()
     temas = Tema.query.all()
@@ -154,6 +157,18 @@ def iniciar_sala():
     if request.method == 'POST':
         sala_id = request.form.get('sala_id')
         sala = Sala.query.get_or_404(sala_id)
+        letras = sala.letras
+        letras_sorteadas = []
+
+        rodadas = []
+        for i in range(int(sala.numero_rodadas)):
+            letras_disponiveis = [letra for letra in letras if letra not in letras_sorteadas]
+            letra_sorteada = random.choice(letras_disponiveis)
+            letras_sorteadas.append(letra_sorteada)
+            rodada = Rodada(numero=i+1, sala=sala, letra_id=letra_sorteada.id)
+            rodadas.append(rodada)
+
+        sala.rodadas = rodadas
         sala.data_inicio = db.func.current_timestamp()
         db.session.add(sala)
         db.session.commit()
@@ -168,7 +183,7 @@ def admin_letras():
         letra_db = Letras(letra=letra)
         db.session.add(letra_db)
         db.session.commit()
-
+    
     letras = Letras.query.all()
     return render_template('letra.html', letras=letras)
     

@@ -13,11 +13,21 @@
         {% endif %}
 
 
+        {% if sala.data_inicio %}
+        <div class="row">
+            <div class="col-6">
+                <p>Número da rodada:</p>
+            </div>
+            <div class="col-6">
+                <p>Letra sorteada: {{sala.rodadas[0].letra.letra}}</p>
+            </div>
+        </div>
+        {% endif %}
 
-
+       
         <div class="row">
             <!-- Coluna de jogadores -->
-            <div class="col-md-2 col-lg-2" style="background-color: aqua;">
+            <div class="col-md-2 col-lg-2">
                 <h5>Jogadores</h5>
                 <ul class="list-unstyled">
                     {% for jogador in ["rebekah","danilo"] %}
@@ -31,37 +41,37 @@
                 </ul>
             </div>
 
-          
-            <div class="col-md-7 col-lg-7" style="background-color:black">
+
+            <div class="col-md-7 col-lg-7">
                 {% if sala.data_inicio %}
+
+
 
                 <div>
                     <form action="/sala/stop">
                         <input type="hidden" name="sala_id" value="{{ sala.id }}">
-                        {% for tema in temas %} 
+                        {% for tema in temas %}
                         <label for="tema_{{tema.id}}">{{tema.nome}}</label>
-                        <input type="text" class="form-control mb-2" id="{{tema.nome}}" name="tema_{{tema.id}}" placeholder="Digite a resposta para {{tema.nome}}" required>
+                        <input type="text" class="form-control mb-2 input-text" id="{{tema.nome}}"
+                            name="tema_{{tema.id}}" placeholder="Digite a resposta para {{tema.nome}}" required>
                         {% endfor %}
-                       
+
                         {{sala.temas}}
                         {{temas}}
-                       
-                        <button type="submit" class="btn btn-danger">Parar Jogo</button>
+
+                        <button type="submit" class="btn btn-danger">STOP</button>
                     </form>
 
                 </div>
-                <button class="btn btn-primary">
-                    STOP
-                </button>
                 {% else %}
 
                 <form action="/sala/iniciar" method="post">
                     <input type="hidden" name="sala_id" value="{{ sala.id }}">
-                <button type="submit" class="btn btn-primary">
-                    Iniciar Jogo
-                </button>
+                    <button type="submit" class="btn btn-primary">
+                        Iniciar Jogo
+                    </button>
                 </form>
-                
+
                 {% endif %}
             </div>
 
