@@ -16,7 +16,7 @@ class Rodada(db.Model):
     sala_id = db.Column(db.Integer, db.ForeignKey('sala.id'), nullable=False)
     letra_id = db.Column(db.ForeignKey('letras.id'), nullable=False)
     letra = db.relationship('Letras', backref='rodadas', lazy=True)
-    data_inicio = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    data_inicio = db.Column(db.DateTime, nullable=True)
     data_fim = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
@@ -42,6 +42,8 @@ class Sala(db.Model):
     finalizado = db.Column(db.Boolean, default=False)
     data_criacao = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     data_inicio = db.Column(db.DateTime, nullable=True)
+    rodada_atual = db.Column(db.Integer, nullable=False, default=0) 
+
 
 class Jogador(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -132,8 +134,8 @@ def criar_sala():
 @app.route('/sala/<int:sala_id>')
 def sala(sala_id):
     sala = Sala.query.get_or_404(sala_id)
-    
-    return render_template('sala.html', sala=sala, rodadas=sala.rodadas, letras=sala.letras, temas=sala.temas, jogadores=sala.jogadores)
+    rodada_atual = Rodada.query.filter_by(sala_id=sala.id, numero=sala.rodada_atual).first()
+    return render_template('sala.html', sala=sala, rodadas=sala.rodadas, letras=sala.letras, temas=sala.temas, jogadores=sala.jogadores, rodada=rodada_atual)
 
 
 @app.route('/salas', methods=['GET'])
@@ -166,10 +168,16 @@ def iniciar_sala():
             letra_sorteada = random.choice(letras_disponiveis)
             letras_sorteadas.append(letra_sorteada)
             rodada = Rodada(numero=i+1, sala=sala, letra_id=letra_sorteada.id)
+            if rodada.numero == 1:
+                rodada.data_inicio = db.func.current_timestamp()
             rodadas.append(rodada)
+            
+        
+        sala.rodada_atual = 1
 
         sala.rodadas = rodadas
         sala.data_inicio = db.func.current_timestamp()
+        db.session.add(rodada)
         db.session.add(sala)
         db.session.commit()
            

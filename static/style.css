@@ -47,3 +47,18 @@
     color: #ffffff;
     font-size:larger
 }
+
+
+#timer {
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.time-warning {
+    color: orange !important;
+    transform: scale(1.2);
+}
+
+.time-danger {
+    color: red !important;
+    transform: scale(1.3);
+}
