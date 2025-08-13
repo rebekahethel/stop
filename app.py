@@ -2,8 +2,19 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import random
 from datetime import datetime, timedelta
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
+app.secret_key = 'jakfjhaAFGKMLajfnakk135682008'
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+@login_manager.user_loader
+def load_user(user_id):
+    return Jogador.query.get(int(user_id))
+
+
+# configurações do banco de dados
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -64,7 +75,7 @@ class Sala(db.Model):
     rodada_atual = db.Column(db.Integer, nullable=False, default=0) 
 
 
-class Jogador(db.Model):
+class Jogador(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(120), nullable=True, unique=True)
