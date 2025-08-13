@@ -4,7 +4,7 @@
 {% if sala.data_inicio %}
 <div class="container mt-5">
     <h1>Sala: {{ sala.id }}</h1>
-    <p>Data de Início: {{ sala.data_inicio.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
 
     {% else %}
     <div class="container mt-5">
@@ -46,22 +46,32 @@
                 {% if sala.data_inicio %}
 
 
+                <form action="/sala/stop"></form>
+                <div class="row">
 
-                <div>
-
-
-                    <form action="/sala/stop">
-                        <input type="hidden" name="sala_id" value="{{ sala.id }}">
-                        {% for tema in temas %}
+                    <input type="hidden" name="sala_id" value="{{ sala.id }}">
+                    {% for tema in temas %}
+                    <div class="col-4">
                         <label for="tema_{{tema.id}}">{{tema.nome}}</label>
-                        <input type="text" class="form-control mb-2 input-text" id="{{tema.nome}}"
-                            name="tema_{{tema.id}}" placeholder="Digite a resposta para {{tema.nome}}" required>
-                        {% endfor %}
+                        <input type="text" class=" mb-2 input-response" id="{{tema.nome}}"
+                            name="tema_{{tema.id}}"  required>
+                    </div>
 
-                        <button type="submit" class="btn btn-danger">STOP</button>
+                    {% endfor %}
+                    
+                   
+                   
 
-                    </form>
-                    {{rodada.data_inicio.strftime('%d/%m/%Y %H:%M:%S') if rodada.data_inicio }}
+
+                </div>
+                <div class="row align-items-center justify-content-center">
+                <button type="submit" class="btn btn-danger mt-4 col-3">STOP</button>
+                </div>
+
+                </form>
+                
+                <div>{{data_inicio_brl.strftime('%d/%m/%Y %H:%M:%S') if rodada.data_inicio }}
+
                     <div id="hora" class="display-6 text-primary"></div>
 
                     <div class="container text-center mt-5">
@@ -72,18 +82,8 @@
                                 style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
-                    <div class="container text-center mt-5">
-                        <h2>Tempo restante:</h2>
-                        <div id="timer" class="display-4 fw-bold text-danger"></div>
-                        <div class="progress mt-3" style="height: 25px;">
-                            <div id="progress-bar" class="progress-bar bg-danger" role="progressbar"
-                                style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
 
-                    <script>
-                        iniciarContagem("{{ rodada.data_inicio.strftime('%Y-%m-%dT%H:%M:%S') }}", "{{ rodada.tempo }}");
-                    </script>
+
 
                 </div>
                 {% else %}
@@ -100,8 +100,58 @@
 
             <!-- Chat -->
             <div class="col-md-3 col-lg-3" style="background-color: lightsalmon;">
-                <h2>Chat</h2>
+                <div class="row">
+                    <h2>Chat</h2>
+                </div>
+
+                <div class="row">
+                    <form action="chat">
+                        <input type="text">
+                    </form>
+                </div>
+                
             </div>
         </div>
 
         {% endblock %}
+
+
+
+        <script>
+            function iniciarContagem(dataInicioUnix, tempoTotalSegundos) {
+                tempoTotalSegundos = parseInt(tempoTotalSegundos, 10);
+                if (isNaN(tempoTotalSegundos)) tempoTotalSegundos = 60;
+
+                const timerElement = document.getElementById('timer');
+                const progressBar = document.getElementById('progress-bar');
+
+                // dataInicioUnix já está em segundos, multiplica por 1000 para ms
+                const fim = (parseInt(dataInicioUnix, 10) * 1000) + tempoTotalSegundos * 1000;
+
+                const countdown = setInterval(() => {
+                    let restante = Math.max(0, Math.floor((fim - Date.now()) / 1000));
+
+                    timerElement.textContent = restante;
+                    progressBar.style.width = (restante / tempoTotalSegundos * 100) + "%";
+
+                    timerElement.classList.toggle("time-warning", restante <= 10 && restante > 5);
+                    timerElement.classList.toggle("time-danger", restante <= 5);
+
+                    if (restante === 0) {
+                        clearInterval(countdown);
+                        timerElement.textContent = "⏰ Tempo esgotado!";
+                        progressBar.classList.remove("bg-danger");
+                        progressBar.classList.add("bg-secondary");
+                    }
+                }, 1000);
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+
+                iniciarContagem(
+                    "{{ data_inicio_brl.timestamp()|int }}",
+                    "{{ sala.tempo }}"
+                );
+
+            });
+        </script>

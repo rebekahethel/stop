@@ -1,13 +1,32 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import random
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# pensar sobre
+class JogadorRodada(db.Model):
+    __tablename__ = 'jogador_rodada'
+    id = db.Column(db.Integer, primary_key=True)
+    jogador_id = db.Column(db.Integer, db.ForeignKey('jogador.id'), nullable=False)
+    rodada_id = db.Column(db.Integer, db.ForeignKey('rodada.id'), nullable=False)
+    pontos = db.Column(db.Integer, default=0)
+    jogador = db.relationship('Jogador', backref='jogador_rodadas')
+    rodada = db.relationship('Rodada', backref='jogador_rodadas')
 
+# pensar sobre
+class JogadorRodadaTema(db.Model):
+    __tablename__ = 'jogador_rodada_tema'
+    id = db.Column(db.Integer, primary_key=True)
+    jogador_rodada_id = db.Column(db.Integer, db.ForeignKey('jogador_rodada.id'), nullable=False)
+    tema_id = db.Column(db.Integer, db.ForeignKey('tema.id'), nullable=False)
+    resposta = db.Column(db.String(100), nullable=True)
+    jogador_rodada = db.relationship('JogadorRodada', backref='jogador_rodada_temas')
+    tema = db.relationship('Tema', backref='tema_jogador_rodadas')
 
 
 class Rodada(db.Model):
@@ -95,6 +114,12 @@ class Letras(db.Model):
 with app.app_context():
     db.create_all() 
 
+
+
+def datetime_to_brl(dt):
+    return dt+timedelta(hours=-3) if dt else None
+
+
 @app.route('/')
 def inicio():
     return render_template('inicio.html')   
@@ -135,7 +160,8 @@ def criar_sala():
 def sala(sala_id):
     sala = Sala.query.get_or_404(sala_id)
     rodada_atual = Rodada.query.filter_by(sala_id=sala.id, numero=sala.rodada_atual).first()
-    return render_template('sala.html', sala=sala, rodadas=sala.rodadas, letras=sala.letras, temas=sala.temas, jogadores=sala.jogadores, rodada=rodada_atual)
+    data_inicio_brl = datetime_to_brl(rodada_atual.data_inicio) if rodada_atual and rodada_atual.data_inicio else None
+    return render_template('sala.html', sala=sala, rodadas=sala.rodadas, letras=sala.letras, temas=sala.temas, jogadores=sala.jogadores, rodada=rodada_atual,data_inicio_brl=data_inicio_brl)
 
 
 @app.route('/salas', methods=['GET'])

@@ -55,6 +55,7 @@ setInterval(mostrarHorario, 1000);
 
 
 function iniciarContagem(dataInicio, tempoTotalSegundos) {
+    tempoTotalSegundos = parseInt(tempoTotalSegundos); 
     let timerElement = document.getElementById('timer');
     let progressBar = document.getElementById('progress-bar');
 

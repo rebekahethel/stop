@@ -62,3 +62,19 @@
     color: red !important;
     transform: scale(1.3);
 }
+
+.input-response {
+    outline: none;
+    box-shadow: none;   
+    border-radius: 10px;
+    height: 45px;
+    border: none;
+    
+}
+
+.input-response:focus {
+
+    border: 4px solid #0815a7;
+    border-radius: 10px;
+
+}
