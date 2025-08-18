@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 import random
 from datetime import datetime, timedelta
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+import random
+import string
+import secrets
 
 app = Flask(__name__)
 app.secret_key = 'jakfjhaAFGKMLajfnakk135682008'
@@ -94,8 +97,6 @@ class SalaJogador(db.Model):
 
 
 
-
-
 class SalaTema(db.Model):
     __tablename__ = 'sala_tema'
     id = db.Column(db.Integer, primary_key=True)
@@ -132,8 +133,11 @@ def datetime_to_brl(dt):
 
 
 @app.route('/')
-def inicio():
-    return render_template('inicio.html')   
+@login_required
+def inicio():   
+    return render_template('inicio.html', current_user=current_user) 
+  
+
 
 
 @app.route('/criar_sala', methods=['GET', 'POST'])
@@ -232,15 +236,66 @@ def admin_letras():
     letras = Letras.query.all()
     return render_template('letra.html', letras=letras)
     
+def criar_usuario(nome, email, senha):
+    jogador = Jogador(nome=nome, email=email, senha=senha)
+    db.session.add(jogador)
+    db.session.commit()
+    return jogador
+
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro():
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+        _jogador = criar_usuario(nome, email, senha)
+
+        return redirect(url_for('login'))
+    
+    return render_template('cadastro.html')
 
 
+@app.route('/cadastro_anonimo', methods=['POST'])
+def cadastro_anonimo():
+    
+    adjectives = ["Fast", "Silent", "Happy", "Dark", "Bright", "Wild", "Crazy", "Calm"]
+    animals = ["Lion", "Tiger", "Eagle", "Shark", "Wolf", "Panda", "Falcon", "Fox"]
+
+    username = random.choice(adjectives) + random.choice(animals) + str(random.randint(100, 999))
+
+    domains = ["example.com", "mail.com", "anon.io", "temp.org"]
+    email = username.lower() + "@" + random.choice(domains)
 
 
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(secrets.choice(characters) for _ in range(12))
+
+    jogador = criar_usuario(username, email, password)
+    login_user(jogador)
+    return redirect(url_for('inicio'))
+
+  
 
 
+@app.route('/login', methods=['GET', 'POST'])  
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+        jogador = Jogador.query.filter_by(email=email, senha=senha).first()
+        if jogador:
+            login_user(jogador)
+            return redirect(url_for('inicio'))
+        else:
+            return 'Email ou senha inválidos', 401
+    
+    return render_template('login.html')
 
-
-
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('cadastro'))
 
 
 

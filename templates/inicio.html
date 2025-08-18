@@ -6,7 +6,7 @@
 
 
 
-        <h1>Bem-vindo ao STOP!</h1>
+        <h1>Bem-vindo ao STOP! {{current_user.nome}}</h1>
 
         <br>
 
@@ -46,6 +46,10 @@
                 <div class="text-center mb-3">
                     <a class="btn botao w-auto mx-auto" href="/salas">Salas Criadas</a>
                 </div>
+                  <div class="text-center mb-3">
+                    <a class="btn botao-sair w-auto mx-auto " href="/logout">Sair</a>
+                </div>
+                
             </div>
 
 
