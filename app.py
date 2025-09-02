@@ -6,6 +6,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import random
 import string
 import secrets
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO, join_room, leave_room, emit
 
 app = Flask(__name__)
 app.secret_key = 'jakfjhaAFGKMLajfnakk135682008'
@@ -21,6 +23,7 @@ def load_user(user_id):
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+socketio = SocketIO(app)
 
 # pensar sobre
 class JogadorRodada(db.Model):
@@ -303,6 +306,40 @@ def logout():
 
 
 
+socketio = SocketIO(app)
+
+
+# Evento para entrar em uma sala
+@socketio.on('entrar_sala')
+def entrar_sala(data):
+    sala = data['sala']
+    usuario = data['usuario']
+    join_room(sala)
+    emit('mensagem', f"{usuario} entrou na sala {sala}", room=sala)
+
+# Evento para sair da sala
+@socketio.on('sair_sala')
+def sair_sala(data):
+    sala = data['sala']
+    usuario = data['usuario']
+    leave_room(sala)
+    emit('mensagem', f"{usuario} saiu da sala {sala}", room=sala)
+
+# Enviar mensagem dentro da sala
+@socketio.on('mensagem_sala')
+def mensagem_sala(data):
+    sala = data['sala']
+    usuario = data['usuario']
+    msg = data['msg']
+    emit('mensagem', f"{usuario}: {msg}", room=sala)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
+
+
+
+
+
+
+
+

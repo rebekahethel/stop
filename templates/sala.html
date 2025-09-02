@@ -4,26 +4,22 @@
 {% if sala.data_inicio %}
 <div class="container mt-5">
     <h1>Sala: {{ sala.id }}</h1>
-
-
     {% else %}
     <div class="container mt-5">
         <h1>Sala: {{ sala.id }}</h1>
         <p>Aguardando início do jogo...</p>
         {% endif %}
 
-
         {% if sala.data_inicio %}
         <div class="row">
             <div class="col-6">
-                <p>Número da rodada: {{rodada.numero}} </p>
+                <p>Número da rodada: {{ rodada.numero }} </p>
             </div>
             <div class="col-6">
-                <p>Letra sorteada: {{rodada.letra.letra}}</p>
+                <p>Letra sorteada: {{ rodada.letra.letra }}</p>
             </div>
         </div>
         {% endif %}
-
 
         <div class="row">
             <!-- Coluna de jogadores -->
@@ -32,7 +28,6 @@
                 <ul class="list-unstyled">
                     {% for jogador in ["rebekah","danilo"] %}
                     <li class="d-flex align-items-center mb-2">
-                        <!-- Avatar redondo (pode substituir por URL do jogador depois) -->
                         <img src="{{ url_for('static', filename='avatar.jpg') }}" alt="avatar" width="40" height="40"
                             class="rounded-circle me-2">
                         <span>{{ jogador }}</span>
@@ -41,39 +36,26 @@
                 </ul>
             </div>
 
-
             <div class="col-md-7 col-lg-7">
                 {% if sala.data_inicio %}
-
-
                 <form action="/sala/stop"></form>
                 <div class="row">
-
                     <input type="hidden" name="sala_id" value="{{ sala.id }}">
                     {% for tema in temas %}
                     <div class="col-4">
-                        <label for="tema_{{tema.id}}">{{tema.nome}}</label>
-                        <input type="text" class=" mb-2 input-response" id="{{tema.nome}}"
-                            name="tema_{{tema.id}}"  required>
+                        <label for="tema_{{ tema.id }}">{{ tema.nome }}</label>
+                        <input type="text" class="mb-2 input-response" id="{{ tema.nome }}" name="tema_{{ tema.id }}"
+                            required>
                     </div>
-
                     {% endfor %}
-                    
-                   
-                   
-
-
                 </div>
                 <div class="row align-items-center justify-content-center">
-                <button type="submit" class="btn btn-danger mt-4 col-3">STOP</button>
+                    <button type="submit" class="btn btn-danger mt-4 col-3">STOP</button>
                 </div>
-
                 </form>
-                
-                <div>{{data_inicio_brl.strftime('%d/%m/%Y %H:%M:%S') if rodada.data_inicio }}
 
+                <div>{{ data_inicio_brl.strftime('%d/%m/%Y %H:%M:%S') if rodada.data_inicio }}
                     <div id="hora" class="display-6 text-primary"></div>
-
                     <div class="container text-center mt-5">
                         <h2>Tempo restante:</h2>
                         <div id="timer" class="display-4 fw-bold text-danger">{{ sala.tempo }}</div>
@@ -82,76 +64,100 @@
                                 style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
-
-
-
                 </div>
                 {% else %}
-
                 <form action="/sala/iniciar" method="post">
                     <input type="hidden" name="sala_id" value="{{ sala.id }}">
                     <button type="submit" class="btn btn-primary">
                         Iniciar Jogo
                     </button>
                 </form>
-
                 {% endif %}
             </div>
+            <div class="col-md-3 col-lg-3 d-flex flex-column" style="background-color: lightsalmon; height: 60vh;">
 
-            <!-- Chat -->
-            <div class="col-md-3 col-lg-3" style="background-color: lightsalmon;">
                 <div class="row">
                     <h2>Chat</h2>
                 </div>
 
-                <div class="row">
-                    <form action="chat">
-                        <input type="text">
-                    </form>
+                <!-- Lista de mensagens -->
+                <ul id="chat" class="flex-grow-1 overflow-auto border p-2 mb-2"></ul>
+
+                <!-- Inputs sempre no rodapé -->
+                <div class="mt-auto">
+                    <input type="text" id="sala" value="{{ sala.id }}" hidden>
+                    <input type="text" id="usuario" value="{{ current_user.nome }}" hidden>
+
+                    <div class="input-group">
+                        <input id="msg" class="form-control" placeholder="Digite sua mensagem...">
+                        <button class="btn btn-danger" onclick="enviar()">Enviar</button>
+                    </div>
                 </div>
-                
             </div>
-        </div>
 
-        {% endblock %}
+            <script>
+                const socket = io();
 
+                function entrar() {
+                    const usuario = document.getElementById("usuario").value;
+                    const sala = document.getElementById("sala").value;
+                    socket.emit("entrar_sala", { usuario, sala });
+                }
 
+                function sair() {
+                    const usuario = document.getElementById("usuario").value;
+                    const sala = document.getElementById("sala").value;
+                    socket.emit("sair_sala", { usuario, sala });
+                }
 
-        <script>
-            function iniciarContagem(dataInicioUnix, tempoTotalSegundos) {
-                tempoTotalSegundos = parseInt(tempoTotalSegundos, 10);
-                if (isNaN(tempoTotalSegundos)) tempoTotalSegundos = 60;
+                function enviar() {
+                    const usuario = document.getElementById("usuario").value;
+                    const sala = document.getElementById("sala").value;
+                    const msg = document.getElementById("msg").value;
+                    socket.emit("mensagem_sala", { usuario, sala, msg });
+                    document.getElementById("msg").value = "";
+                }
 
-                const timerElement = document.getElementById('timer');
-                const progressBar = document.getElementById('progress-bar');
+                socket.on("mensagem", (msg) => {
+                    const li = document.createElement("li");
+                    li.textContent = msg;
+                    document.getElementById("chat").appendChild(li);
+                });
 
-                // dataInicioUnix já está em segundos, multiplica por 1000 para ms
-                const fim = (parseInt(dataInicioUnix, 10) * 1000) + tempoTotalSegundos * 1000;
+                function iniciarContagem(dataInicioUnix, tempoTotalSegundos) {
+                    tempoTotalSegundos = parseInt(tempoTotalSegundos, 10);
+                    if (isNaN(tempoTotalSegundos)) tempoTotalSegundos = 60;
 
-                const countdown = setInterval(() => {
-                    let restante = Math.max(0, Math.floor((fim - Date.now()) / 1000));
+                    const timerElement = document.getElementById('timer');
+                    const progressBar = document.getElementById('progress-bar');
 
-                    timerElement.textContent = restante;
-                    progressBar.style.width = (restante / tempoTotalSegundos * 100) + "%";
+                    // dataInicioUnix já está em segundos, multiplica por 1000 para ms
+                    const fim = (parseInt(dataInicioUnix, 10) * 1000) + tempoTotalSegundos * 1000;
 
-                    timerElement.classList.toggle("time-warning", restante <= 10 && restante > 5);
-                    timerElement.classList.toggle("time-danger", restante <= 5);
+                    const countdown = setInterval(() => {
+                        let restante = Math.max(0, Math.floor((fim - Date.now()) / 1000));
 
-                    if (restante === 0) {
-                        clearInterval(countdown);
-                        timerElement.textContent = "⏰ Tempo esgotado!";
-                        progressBar.classList.remove("bg-danger");
-                        progressBar.classList.add("bg-secondary");
-                    }
-                }, 1000);
-            }
+                        timerElement.textContent = restante;
+                        progressBar.style.width = (restante / tempoTotalSegundos * 100) + "%";
 
-            document.addEventListener("DOMContentLoaded", () => {
+                        timerElement.classList.toggle("time-warning", restante <= 10 && restante > 5);
+                        timerElement.classList.toggle("time-danger", restante <= 5);
 
-                iniciarContagem(
-                    "{{ data_inicio_brl.timestamp()|int }}",
-                    "{{ sala.tempo }}"
-                );
+                        if (restante === 0) {
+                            clearInterval(countdown);
+                            timerElement.textContent = "⏰ Tempo esgotado!";
+                            progressBar.classList.remove("bg-danger");
+                            progressBar.classList.add("bg-secondary");
+                        }
+                    }, 1000);
+                }
 
-            });
-        </script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    iniciarContagem(
+                        "{{ data_inicio_brl.timestamp()|int }}",
+                        "{{ sala.tempo }}"
+                    );
+                });
+                entrar();
+            </script>
+            {% endblock %}
