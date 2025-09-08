@@ -25,15 +25,7 @@
             <!-- Coluna de jogadores -->
             <div class="col-md-2 col-lg-2">
                 <h5>Jogadores</h5>
-                <ul class="list-unstyled">
-                    {% for jogador in ["rebekah","danilo"] %}
-                    <li class="d-flex align-items-center mb-2">
-                        <img src="{{ url_for('static', filename='avatar.jpg') }}" alt="avatar" width="40" height="40"
-                            class="rounded-circle me-2">
-                        <span>{{ jogador }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
+                   <ul id="lista-jogadores" class="list-unstyled"></ul>
             </div>
 
             <div class="col-md-7 col-lg-7">
@@ -90,7 +82,7 @@
 
                     <div class="input-group">
                         <input id="msg" class="form-control" placeholder="Digite sua mensagem...">
-                        <button class="btn btn-danger" onclick="enviar()">Enviar</button>
+                        <button type="submit" class="btn btn-danger" onclick="enviar()">Enviar</button>
                     </div>
                 </div>
             </div>
@@ -105,10 +97,26 @@
                 }
 
                 function sair() {
-                    const usuario = document.getElementById("usuario").value;
-                    const sala = document.getElementById("sala").value;
-                    socket.emit("sair_sala", { usuario, sala });
+                const usuario = document.getElementById("usuario").value;
+                const sala = document.getElementById("sala").value;
+                socket.emit("sair_sala", { usuario, sala });
                 }
+
+                socket.on("atualizar_jogadores", (jogadores) => {
+                    const lista = document.getElementById("lista-jogadores");
+                    lista.innerHTML = "";
+                    jogadores.forEach(j => {
+                        const li = document.createElement("li");
+                        li.classList.add("d-flex", "align-items-center", "mb-2");
+                        li.innerHTML = `
+                <img src="/static/avatar.jpg" alt="avatar" width="40" height="40"
+                    class="rounded-circle me-2">
+                <span>${j}</span>
+            `;
+                        lista.appendChild(li);
+                    });
+                });
+
 
                 function enviar() {
                     const usuario = document.getElementById("usuario").value;
@@ -154,7 +162,7 @@
 
                 document.addEventListener("DOMContentLoaded", () => {
                     iniciarContagem(
-                        "{{ data_inicio_brl.timestamp()|int }}",
+                        
                         "{{ sala.tempo }}"
                     );
                 });

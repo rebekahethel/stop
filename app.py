@@ -302,28 +302,44 @@ def logout():
 
 
 
-
-
-
-
 socketio = SocketIO(app)
+salas = {}  
+
+@socketio.on("entrar_sala")
+def handle_entrar_sala(data):
+    usuario = data["usuario"]
+    sala_id = data["sala"]
+
+    join_room(sala_id)
+
+    if sala_id not in salas:
+        salas[sala_id] = []
+    if usuario not in salas[sala_id]:
+        salas[sala_id].append(usuario)
+
+    # 1º emit → lista atualizada
+    emit("atualizar_jogadores", salas[sala_id], room=sala_id)
+
+    # 2º emit → mensagem de chat
+    emit("mensagem", f"{usuario} entrou na sala {sala_id}", room=sala_id)
 
 
-# Evento para entrar em uma sala
-@socketio.on('entrar_sala')
-def entrar_sala(data):
-    sala = data['sala']
-    usuario = data['usuario']
-    join_room(sala)
-    emit('mensagem', f"{usuario} entrou na sala {sala}", room=sala)
+@socketio.on("sair_sala")
+def handle_sair_sala(data):
+    usuario = data["usuario"]
+    sala_id = data["sala"]
 
-# Evento para sair da sala
-@socketio.on('sair_sala')
-def sair_sala(data):
-    sala = data['sala']
-    usuario = data['usuario']
-    leave_room(sala)
-    emit('mensagem', f"{usuario} saiu da sala {sala}", room=sala)
+    leave_room(sala_id)
+
+    if sala_id in salas and usuario in salas[sala_id]:
+        salas[sala_id].remove(usuario)
+
+    # 1º emit → lista atualizada
+    emit("atualizar_jogadores", salas[sala_id], room=sala_id)
+
+    # 2º emit → mensagem de chat
+    emit("mensagem", f"{usuario} saiu da sala {sala_id}", room=sala_id)
+
 
 # Enviar mensagem dentro da sala
 @socketio.on('mensagem_sala')
