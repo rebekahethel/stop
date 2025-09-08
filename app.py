@@ -200,31 +200,7 @@ def admin_tema():
 
 @app.route('/sala/iniciar', methods=['GET', 'POST'])
 def iniciar_sala():
-    if request.method == 'POST':
-        sala_id = request.form.get('sala_id')
-        sala = Sala.query.get_or_404(sala_id)
-        letras = sala.letras
-        letras_sorteadas = []
-
-        rodadas = []
-        for i in range(int(sala.numero_rodadas)):
-            letras_disponiveis = [letra for letra in letras if letra not in letras_sorteadas]
-            letra_sorteada = random.choice(letras_disponiveis)
-            letras_sorteadas.append(letra_sorteada)
-            rodada = Rodada(numero=i+1, sala=sala, letra_id=letra_sorteada.id)
-            if rodada.numero == 1:
-                rodada.data_inicio = db.func.current_timestamp()
-            rodadas.append(rodada)
-            
-        
-        sala.rodada_atual = 1
-
-        sala.rodadas = rodadas
-        sala.data_inicio = db.func.current_timestamp()
-        db.session.add(rodada)
-        db.session.add(sala)
-        db.session.commit()
-           
+   
         return redirect(url_for('sala', sala_id=sala.id))
     
 
@@ -348,6 +324,36 @@ def mensagem_sala(data):
     usuario = data['usuario']
     msg = data['msg']
     emit('mensagem', f"{usuario}: {msg}", room=sala)
+
+
+@socketio.on("iniciar_jogo")
+def handle_iniciar_jogo(data):
+    sala_id = data["sala"]
+    sala = Sala.query.get_or_404(sala_id)
+    letras = sala.letras
+    letras_sorteadas = []
+
+    rodadas = []
+    for i in range(int(sala.numero_rodadas)):
+        letras_disponiveis = [letra for letra in letras if letra not in letras_sorteadas]
+        letra_sorteada = random.choice(letras_disponiveis)
+        letras_sorteadas.append(letra_sorteada)
+        rodada = Rodada(numero=i+1, sala=sala, letra_id=letra_sorteada.id)
+        if rodada.numero == 1:
+            rodada.data_inicio = db.func.current_timestamp()
+        rodadas.append(rodada)
+        
+    
+    sala.rodada_atual = 1
+
+    sala.rodadas = rodadas
+    sala.data_inicio = db.func.current_timestamp()
+    db.session.add(rodada)
+    db.session.add(sala)
+    db.session.commit()
+
+    emit("mensagem", f"Jogo iniciado", room=sala_id)
+    emit("jogo_iniciado")
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

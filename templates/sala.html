@@ -25,7 +25,7 @@
             <!-- Coluna de jogadores -->
             <div class="col-md-2 col-lg-2">
                 <h5>Jogadores</h5>
-                   <ul id="lista-jogadores" class="list-unstyled"></ul>
+                <ul id="lista-jogadores" class="list-unstyled"></ul>
             </div>
 
             <div class="col-md-7 col-lg-7">
@@ -58,12 +58,9 @@
                     </div>
                 </div>
                 {% else %}
-                <form action="/sala/iniciar" method="post">
-                    <input type="hidden" name="sala_id" value="{{ sala.id }}">
-                    <button type="submit" class="btn btn-primary">
-                        Iniciar Jogo
-                    </button>
-                </form>
+                <div class="input-group">
+                    <button class="btn btn-primary" onclick="iniciar_jogo()">Iniciar Jogo</button>
+                </div>
                 {% endif %}
             </div>
             <div class="col-md-3 col-lg-3 d-flex flex-column" style="background-color: lightsalmon; height: 60vh;">
@@ -97,9 +94,14 @@
                 }
 
                 function sair() {
-                const usuario = document.getElementById("usuario").value;
-                const sala = document.getElementById("sala").value;
-                socket.emit("sair_sala", { usuario, sala });
+                    const usuario = document.getElementById("usuario").value;
+                    const sala = document.getElementById("sala").value;
+                    socket.emit("sair_sala", { usuario, sala });
+                }
+
+                function iniciar_jogo() {
+                    const sala = document.getElementById("sala").value;
+                    socket.emit("iniciar_jogo", { usuario, sala });
                 }
 
                 socket.on("atualizar_jogadores", (jogadores) => {
@@ -116,6 +118,12 @@
                         lista.appendChild(li);
                     });
                 });
+
+
+                socket.on("jogo_iniciado", (msg) => {
+                    location.reload();
+                });
+
 
 
                 function enviar() {
@@ -162,7 +170,7 @@
 
                 document.addEventListener("DOMContentLoaded", () => {
                     iniciarContagem(
-                        
+
                         "{{ sala.tempo }}"
                     );
                 });
