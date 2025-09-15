@@ -12,11 +12,10 @@
 
         {% if sala.data_inicio %}
         <div class="row">
-            <div class="col-6">
-                <p>Número da rodada: {{ rodada.numero }} </p>
-            </div>
-            <div class="col-6">
-                <p>Letra sorteada: {{ rodada.letra.letra }}</p>
+            <div class="col-12 justify-content-center text-center mb-3">
+                <span class="me-4">Número da rodada: {{ rodada.numero }} </span>
+
+                <span class="ms-4">Letra sorteada: {{ rodada.letra.letra }}</span>
             </div>
         </div>
         {% endif %}
@@ -30,33 +29,23 @@
 
             <div class="col-md-7 col-lg-7">
                 {% if sala.data_inicio %}
-                <form action="/sala/stop"></form>
+
                 <div class="row">
                     <input type="hidden" name="sala_id" value="{{ sala.id }}">
                     {% for tema in temas %}
                     <div class="col-4">
-                        <label for="tema_{{ tema.id }}">{{ tema.nome }}</label>
-                        <input type="text" class="mb-2 input-response" id="{{ tema.nome }}" name="tema_{{ tema.id }}"
+                        <label for="{{ tema.id }}">{{ tema.nome }}</label>
+                        <input type="text" class="mb-2 input-response" id="{{ tema.id }}" name="{{ tema.id }}"
                             required>
                     </div>
                     {% endfor %}
                 </div>
                 <div class="row align-items-center justify-content-center">
-                    <button type="submit" class="btn btn-danger mt-4 col-3">STOP</button>
+                    <button onclick="stop()" class="btn btn-danger mt-4 col-3">STOP</button>
                 </div>
-                </form>
 
-                <div>{{ data_inicio_brl.strftime('%d/%m/%Y %H:%M:%S') if rodada.data_inicio }}
-                    <div id="hora" class="display-6 text-primary"></div>
-                    <div class="container text-center mt-5">
-                        <h2>Tempo restante:</h2>
-                        <div id="timer" class="display-4 fw-bold text-danger">{{ sala.tempo }}</div>
-                        <div class="progress mt-3" style="height: 25px;">
-                            <div id="progress-bar" class="progress-bar bg-danger" role="progressbar"
-                                style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
+
+
                 {% else %}
                 <div class="input-group">
                     <button class="btn btn-primary" onclick="iniciar_jogo()">Iniciar Jogo</button>
@@ -74,9 +63,11 @@
 
                 <!-- Inputs sempre no rodapé -->
                 <div class="mt-auto">
+                    <input type="text" id="sala_id" value="{{ sala.id }}" hidden>
+                    <input type="text" id="jogador_id" value="{{ current_user.id }}" hidden>
+
                     <input type="text" id="sala" value="{{ sala.id }}" hidden>
                     <input type="text" id="usuario" value="{{ current_user.nome }}" hidden>
-
                     <div class="input-group">
                         <input id="msg" class="form-control" placeholder="Digite sua mensagem...">
                         <button type="submit" class="btn btn-danger" onclick="enviar()">Enviar</button>
@@ -133,6 +124,27 @@
                     socket.emit("mensagem_sala", { usuario, sala, msg });
                     document.getElementById("msg").value = "";
                 }
+
+
+                function stop() {
+                    const jogador_id = document.getElementById("jogador_id").value;
+                    const sala_id = document.getElementById("sala_id").value;
+                    const usuario = document.getElementById("usuario").value;
+                    // Pega todos os inputs de resposta
+                    const respostas = {};
+                    document.querySelectorAll(".input-response").forEach(input => {
+                        respostas[input.name] = input.value.trim(); // usa o name (tema_id) como chave
+                    });
+
+                    // Envia via socket
+                    socket.emit("stop_respostas", { jogador_id, sala_id, respostas, usuario });
+
+                    // Opcional: desabilitar inputs após enviar
+                    document.querySelectorAll(".input-response").forEach(input => {
+                        input.disabled = true;
+                    });
+                }
+
 
                 socket.on("mensagem", (msg) => {
                     const li = document.createElement("li");

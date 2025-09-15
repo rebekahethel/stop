@@ -46,6 +46,7 @@ class JogadorRodadaTema(db.Model):
     tema = db.relationship('Tema', backref='tema_jogador_rodadas')
 
 
+
 class Rodada(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     numero = db.Column(db.Integer, nullable=False)
@@ -324,6 +325,29 @@ def mensagem_sala(data):
     usuario = data['usuario']
     msg = data['msg']
     emit('mensagem', f"{usuario}: {msg}", room=sala)
+
+
+@socketio.on("stop_respostas")
+def handle_stop_respostas(data):
+    jogador_id = data["jogador_id"]
+    sala_id = data["sala_id"]
+    usuario = data["usuario"]
+    respostas = data["respostas"]  # dicionário com tema_id -> resposta
+
+    print(f"STOP de {jogador_id} na sala {sala_id}: {respostas}")
+    jogador_rodada = JogadorRodada(jogador_id=int(jogador_id), rodada_id = 1)
+    lista_respostas = []
+    for tema_id, resposta in respostas.items():
+        jogador_rodada_tema = JogadorRodadaTema(jogador_rodada=jogador_rodada, tema_id=int(tema_id), resposta=resposta)
+        lista_respostas.append(jogador_rodada_tema)
+    db.session.add(jogador_rodada)
+    db.session.add_all(lista_respostas)
+    db.session.commit()
+
+    # Aqui você pode salvar no banco, validar, etc.
+    # Depois pode emitir para a sala se quiser:
+    emit("mensagem", {"usuario": usuario, "respostas": respostas}, room=sala_id)
+
 
 
 @socketio.on("iniciar_jogo")
