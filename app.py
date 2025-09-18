@@ -326,6 +326,15 @@ def mensagem_sala(data):
     msg = data['msg']
     emit('mensagem', f"{usuario}: {msg}", room=sala)
 
+@socketio.on("stop")
+def handle_stop(data):
+    jogador_id = data["jogador_id"]
+    sala_id = data["sala_id"]
+    usuario = data["usuario"]
+
+    emit("stop_geral",{"usuario" : usuario}, room=sala_id)
+
+
 
 @socketio.on("stop_respostas")
 def handle_stop_respostas(data):
@@ -346,7 +355,10 @@ def handle_stop_respostas(data):
 
     # Aqui você pode salvar no banco, validar, etc.
     # Depois pode emitir para a sala se quiser:
-    emit("mensagem", {"usuario": usuario, "respostas": respostas}, room=sala_id)
+    emit("mensagem", {"usuario": usuario}, room=sala_id)
+
+
+
 
 
 
@@ -366,8 +378,8 @@ def handle_iniciar_jogo(data):
         if rodada.numero == 1:
             rodada.data_inicio = db.func.current_timestamp()
         rodadas.append(rodada)
-        
-    
+
+
     sala.rodada_atual = 1
 
     sala.rodadas = rodadas
@@ -377,7 +389,7 @@ def handle_iniciar_jogo(data):
     db.session.commit()
 
     emit("mensagem", f"Jogo iniciado", room=sala_id)
-    emit("jogo_iniciado")
+    emit("jogo_iniciado", room=sala_id)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

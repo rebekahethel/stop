@@ -35,8 +35,7 @@
                     {% for tema in temas %}
                     <div class="col-4">
                         <label for="{{ tema.id }}">{{ tema.nome }}</label>
-                        <input type="text" class="mb-2 input-response" id="{{ tema.id }}" name="{{ tema.id }}"
-                            required>
+                        <input type="text" class="mb-2 input-response" id="{{ tema.id }}" name="{{ tema.id }}" required>
                     </div>
                     {% endfor %}
                 </div>
@@ -93,6 +92,7 @@
                 function iniciar_jogo() {
                     const sala = document.getElementById("sala").value;
                     socket.emit("iniciar_jogo", { usuario, sala });
+
                 }
 
                 socket.on("atualizar_jogadores", (jogadores) => {
@@ -113,6 +113,7 @@
 
                 socket.on("jogo_iniciado", (msg) => {
                     location.reload();
+                    console.log("Jogo iniciado!");
                 });
 
 
@@ -126,7 +127,18 @@
                 }
 
 
+
                 function stop() {
+                    const jogador_id = document.getElementById("jogador_id").value;
+                    const sala_id = document.getElementById("sala_id").value;
+                    const usuario = document.getElementById("usuario").value;
+                    socket.emit("stop", { jogador_id, sala_id, usuario });
+
+                }
+
+                // Função que coleta e envia respostas
+                function enviarRespostas() {
+
                     const jogador_id = document.getElementById("jogador_id").value;
                     const sala_id = document.getElementById("sala_id").value;
                     const usuario = document.getElementById("usuario").value;
@@ -137,13 +149,18 @@
                     });
 
                     // Envia via socket
-                    socket.emit("stop_respostas", { jogador_id, sala_id, respostas, usuario });
-
+                   socket.emit("stop_respostas", { jogador_id, sala_id, respostas, usuario });
                     // Opcional: desabilitar inputs após enviar
                     document.querySelectorAll(".input-response").forEach(input => {
                         input.disabled = true;
                     });
-                }
+                  }
+
+                // Quando receber o STOP geral, todos os jogadores enviam também
+                socket.on("stop_geral", (data) => {
+                    console.log("STOP acionado por:", data.usuario);
+                    enviarRespostas();
+                });
 
 
                 socket.on("mensagem", (msg) => {
