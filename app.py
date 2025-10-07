@@ -8,7 +8,7 @@ import string
 import secrets
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, join_room, leave_room, emit
-
+import time
 app = Flask(__name__)
 app.secret_key = 'jakfjhaAFGKMLajfnakk135682008'
 login_manager = LoginManager()
@@ -180,7 +180,9 @@ def sala(sala_id):
     sala = Sala.query.get_or_404(sala_id)
     rodada_atual = Rodada.query.filter_by(sala_id=sala.id, numero=sala.rodada_atual).first()
     data_inicio_brl = datetime_to_brl(rodada_atual.data_inicio) if rodada_atual and rodada_atual.data_inicio else None
-    return render_template('sala.html', sala=sala, rodadas=sala.rodadas, letras=sala.letras, temas=sala.temas, jogadores=sala.jogadores, rodada=rodada_atual,data_inicio_brl=data_inicio_brl)
+    current_timestamp = int(time.time())+60  # gera timestamp atual em segundos
+    print(f"Data inicio BRL: {data_inicio_brl}, current_timestamp: {current_timestamp}")
+    return render_template('sala.html', sala=sala, rodadas=sala.rodadas, letras=sala.letras, temas=sala.temas, jogadores=sala.jogadores, rodada=rodada_atual,data_inicio_brl=data_inicio_brl, current_timestamp=current_timestamp)
 
 
 @app.route('/salas', methods=['GET'])
@@ -331,6 +333,14 @@ def handle_stop(data):
     jogador_id = data["jogador_id"]
     sala_id = data["sala_id"]
     usuario = data["usuario"]
+    sala = Sala.query.get(sala_id)
+    print(f"Roadada atual antes: {sala.rodada_atual} de {sala.numero_rodadas}")
+    if sala.rodada_atual == sala.numero_rodadas:
+        sala.finalizado = True 
+    else: 
+        sala.rodada_atual += 1    
+    db.session.add(sala)
+    db.session.commit()
 
     emit("stop_geral",{"usuario" : usuario}, room=sala_id)
 
@@ -355,9 +365,28 @@ def handle_stop_respostas(data):
 
     # Aqui você pode salvar no banco, validar, etc.
     # Depois pode emitir para a sala se quiser:
-    emit("mensagem", {"usuario": usuario}, room=sala_id)
+    emit("rodada_atualizada", room=sala_id)
+    emit("mensagem", f"Stop solicitado", room=sala_id)
 
 
+@app.route('/resultado/<int:sala_id>')
+def resultado(sala_id):
+    sala = Sala.query.get_or_404(sala_id)
+    jogadores = sala.jogadores
+    rodadas = sala.rodadas
+    resultados = []
+
+    for jogador in jogadores:
+        total_pontos = 0
+        for rodada in rodadas:
+            jogador_rodada = JogadorRodada.query.filter_by(jogador_id=jogador.id, rodada_id=rodada.id).first()
+            if jogador_rodada:
+                total_pontos += jogador_rodada.pontos
+        resultados.append((jogador, total_pontos))
+
+    resultados.sort(key=lambda x: x[1], reverse=True)
+
+    return render_template('resultado.html', sala=sala, resultados=resultados)
 
 
 
@@ -383,13 +412,14 @@ def handle_iniciar_jogo(data):
     sala.rodada_atual = 1
 
     sala.rodadas = rodadas
+    rodadas[0].data_inicio = db.func.current_timestamp()
     sala.data_inicio = db.func.current_timestamp()
-    db.session.add(rodada)
     db.session.add(sala)
     db.session.commit()
 
     emit("mensagem", f"Jogo iniciado", room=sala_id)
-    emit("jogo_iniciado", room=sala_id)
+    emit("jogo_iniciado", room=sala_id, current_timestamp=rodadas[0].data_inicio.strftime('%Y-%m-%d %H:%M:%S'))
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

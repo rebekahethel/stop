@@ -28,7 +28,15 @@
             </div>
 
             <div class="col-md-7 col-lg-7">
-                {% if sala.data_inicio %}
+                {% if sala.finalizado %}
+                <div class="alert alert-info text-center" role="alert">
+                    Jogo finalizado! Obrigado por jogar.
+                    Veja o ranking abaixo:
+                    <a href="{{ url_for('resultado', sala_id=sala.id) }}" class="btn btn-primary btn-sm ms-2">Ver
+                        Ranking</a>
+                </div>
+
+                {% elif sala.data_inicio %}
 
                 <div class="row">
                     <input type="hidden" name="sala_id" value="{{ sala.id }}">
@@ -44,13 +52,13 @@
                 </div>
 
 
-
                 {% else %}
                 <div class="input-group">
                     <button class="btn btn-primary" onclick="iniciar_jogo()">Iniciar Jogo</button>
                 </div>
                 {% endif %}
             </div>
+
             <div class="col-md-3 col-lg-3 d-flex flex-column" style="background-color: lightsalmon; height: 60vh;">
 
                 <div class="row">
@@ -71,6 +79,18 @@
                         <input id="msg" class="form-control" placeholder="Digite sua mensagem...">
                         <button type="submit" class="btn btn-danger" onclick="enviar()">Enviar</button>
                     </div>
+                </div>
+            </div>
+
+            <div class="container text-center">
+                <h1>⏳ Tempo Restante</h1>
+
+                <!-- Elemento do timer -->
+                <div id="timer">Carregando...</div>
+
+                <!-- Barra de progresso -->
+                <div class="progress w-75 mx-auto">
+                    <div id="progress-bar" class="progress-bar bg-success" style="width: 100%;"></div>
                 </div>
             </div>
 
@@ -114,7 +134,18 @@
                 socket.on("jogo_iniciado", (msg) => {
                     location.reload();
                     console.log("Jogo iniciado!");
+                    //emit("jogo_iniciado", room=sala_id, current_timestamp=rodada[0].data_inicio.strftime('%Y-%m-%d %H:%M:%S'))
+
                 });
+
+
+
+                socket.on("rodada_atualizada", (msg) => {
+                    location.reload();
+                    console.log("Rodada Atualizada!");
+
+                });
+
 
 
 
@@ -149,12 +180,12 @@
                     });
 
                     // Envia via socket
-                   socket.emit("stop_respostas", { jogador_id, sala_id, respostas, usuario });
+                    socket.emit("stop_respostas", { jogador_id, sala_id, respostas, usuario });
                     // Opcional: desabilitar inputs após enviar
                     document.querySelectorAll(".input-response").forEach(input => {
                         input.disabled = true;
                     });
-                  }
+                }
 
                 // Quando receber o STOP geral, todos os jogadores enviam também
                 socket.on("stop_geral", (data) => {
@@ -169,6 +200,7 @@
                     document.getElementById("chat").appendChild(li);
                 });
 
+
                 function iniciarContagem(dataInicioUnix, tempoTotalSegundos) {
                     tempoTotalSegundos = parseInt(tempoTotalSegundos, 10);
                     if (isNaN(tempoTotalSegundos)) tempoTotalSegundos = 60;
@@ -176,13 +208,12 @@
                     const timerElement = document.getElementById('timer');
                     const progressBar = document.getElementById('progress-bar');
 
-                    // dataInicioUnix já está em segundos, multiplica por 1000 para ms
                     const fim = (parseInt(dataInicioUnix, 10) * 1000) + tempoTotalSegundos * 1000;
 
                     const countdown = setInterval(() => {
                         let restante = Math.max(0, Math.floor((fim - Date.now()) / 1000));
 
-                        timerElement.textContent = restante;
+                        timerElement.textContent = restante + "s";
                         progressBar.style.width = (restante / tempoTotalSegundos * 100) + "%";
 
                         timerElement.classList.toggle("time-warning", restante <= 10 && restante > 5);
@@ -191,18 +222,20 @@
                         if (restante === 0) {
                             clearInterval(countdown);
                             timerElement.textContent = "⏰ Tempo esgotado!";
-                            progressBar.classList.remove("bg-danger");
+                            progressBar.classList.remove("bg-success", "bg-warning", "bg-danger");
                             progressBar.classList.add("bg-secondary");
                         }
                     }, 1000);
                 }
 
                 document.addEventListener("DOMContentLoaded", () => {
-                    iniciarContagem(
-
-                        "{{ sala.tempo }}"
-                    );
+            
+                    const agora = Math.floor(Date.now() / 1000);
+                    iniciarContagem(agora, 20); // timer de 20 segundos
+                     
+                   
                 });
+
                 entrar();
             </script>
             {% endblock %}
